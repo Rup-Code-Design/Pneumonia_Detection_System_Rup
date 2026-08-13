@@ -68,7 +68,7 @@ with title_col1:
 
         st.image(
             ICON_PATH,
-            width=90
+            width=80
         )
 
     else:
