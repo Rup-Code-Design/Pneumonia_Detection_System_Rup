@@ -477,8 +477,8 @@ Invalid modality model output.
 
 Expected 3 classes:
 X-ray
-CT
 MRI
+CT
 
 Received:
 {len(prediction)}
