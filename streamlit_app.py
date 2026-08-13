@@ -45,64 +45,6 @@ from reportlab.platypus import (
 
 
 # ============================================================
-# STREAMLIT CONFIGURATION
-# ============================================================
-
-st.set_page_config(
-    page_title="Pneumonia Detection System",
-    page_icon="🩻",
-    layout="centered",
-)
-
-
-# ============================================================
-# CUSTOM CSS
-# ============================================================
-
-st.markdown(
-    """
-    <style>
-
-    .main-title {
-        text-align: center;
-        font-size: 30px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .subtitle {
-        text-align: center;
-        font-size: 17px;
-        margin-bottom: 25px;
-    }
-
-    .result-box {
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #cccccc;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-
-    .normal-result {
-        background-color: #eaf7ea;
-    }
-
-    .pneumonia-result {
-        background-color: #fdeaea;
-    }
-
-    .modality-result {
-        background-color: #eef4ff;
-    }
-
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# ============================================================
 # PAGE TITLE WITH LUNG X-RAY ICON
 # ============================================================
 
@@ -111,125 +53,47 @@ ICON_PATH = os.path.join(
     "lung_xray_icon.png"
 )
 
-if os.path.exists(ICON_PATH):
+# ------------------------------------------------------------
+# TITLE ROW
+# ------------------------------------------------------------
 
-    with open(ICON_PATH, "rb") as f:
-        icon_bytes = f.read()
-
-    import base64
-
-    icon_base64 = base64.b64encode(
-        icon_bytes
-    ).decode()
-
-    st.markdown(
-        f"""
-        <div style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            margin-top: 5px;
-            margin-bottom: 8px;
-        ">
-
-            <img
-                src="data:image/png;base64,{icon_base64}"
-                style="
-                    width: 10px;
-                    height: 10px;
-                    object-fit: contain;
-                    border-radius: 8px;
-                "
-            >
-
-            <div style="
-                font-size: 34px;
-                font-weight: 700;
-                text-align: left;
-                line-height: 1.15;
-            ">
-                PNEUMONIA DETECTION SYSTEM<br>
-                FROM X-RAY IMAGES
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-else:
-
-    st.markdown(
-        '<div class="main-title">'
-        'PNEUMONIA DETECTION SYSTEM FROM X-RAY IMAGES'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-# ============================================================
-# PAGE TITLE WITH LUNG X-RAY ICON
-# ============================================================
-
-ICON_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "lung_xray_icon.png"
+title_col1, title_col2 = st.columns(
+    [1, 6],
+    vertical_alignment="center"
 )
 
-if os.path.exists(ICON_PATH):
+with title_col1:
 
-    with open(ICON_PATH, "rb") as f:
-        icon_bytes = f.read()
+    if os.path.exists(ICON_PATH):
 
-    import base64
+        st.image(
+            ICON_PATH,
+            width=110
+        )
 
-    icon_base64 = base64.b64encode(
-        icon_bytes
-    ).decode()
+    else:
+
+        st.error(
+            "lung_xray_icon.png not found"
+        )
+
+
+with title_col2:
 
     st.markdown(
-        f"""
-        <div style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            margin-top: 5px;
-            margin-bottom: 8px;
+        """
+        <h1 style="
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1.15;
+            margin: 0;
+            padding: 0;
         ">
-
-            <img
-                src="data:image/png;base64,{icon_base64}"
-                style="
-                    width: 70px;
-                    height: 70px;
-                    object-fit: contain;
-                    border-radius: 8px;
-                "
-            >
-
-            <div style="
-                font-size: 34px;
-                font-weight: 700;
-                text-align: left;
-                line-height: 1.15;
-            ">
-                PNEUMONIA DETECTION SYSTEM<br>
-                FROM X-RAY IMAGES
-            </div>
-
-        </div>
+            PNEUMONIA DETECTION SYSTEM<br>
+            FROM X-RAY IMAGES
+        </h1>
         """,
         unsafe_allow_html=True
-    )
-
-else:
-
-    st.markdown(
-        '<div class="main-title">'
-        'PNEUMONIA DETECTION SYSTEM FROM X-RAY IMAGES'
-        '</div>',
-        unsafe_allow_html=True,
     )
 
 
@@ -238,10 +102,18 @@ else:
 # ============================================================
 
 st.markdown(
-    '<div class="subtitle">'
-    'Automated medical image modality verification and pneumonia detection'
-    '</div>',
-    unsafe_allow_html=True,
+    """
+    <div style="
+        text-align: center;
+        font-size: 17px;
+        margin-top: 10px;
+        margin-bottom: 25px;
+    ">
+        Automated medical image modality verification and
+        pneumonia detection
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 # ============================================================
 # MODEL PATHS
