@@ -68,7 +68,7 @@ with title_col1:
 
         st.image(
             ICON_PATH,
-            width=110
+            width=90
         )
 
     else:
@@ -84,7 +84,7 @@ with title_col2:
         """
         <h1 style="
             font-size: 32px;
-            font-weight: 700;
+            font-weight: 600;
             line-height: 1.15;
             margin: 0;
             padding: 0;
