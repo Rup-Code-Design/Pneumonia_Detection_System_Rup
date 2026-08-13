@@ -56,62 +56,43 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS
+# MAIN TITLE
 # ============================================================
 
 st.markdown(
     """
-    <style>
+    <div style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    ">
+        <div style="
+            font-size: 45px;
+            line-height: 1;
+        ">
+            🫁
+        </div>
 
-    .main-title {
-        text-align: center;
-        font-size: 34px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .subtitle {
-        text-align: center;
-        font-size: 17px;
-        margin-bottom: 25px;
-    }
-
-    .result-box {
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #cccccc;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-
-    .normal-result {
-        background-color: #eaf7ea;
-    }
-
-    .pneumonia-result {
-        background-color: #fdeaea;
-    }
-
-    .modality-result {
-        background-color: #eef4ff;
-    }
-
-    </style>
+        <div style="
+            font-size: 32px;
+            font-weight: 700;
+            text-align: left;
+            line-height: 1.15;
+        ">
+            PNEUMONIA DETECTION SYSTEM<br>
+            FROM X-RAY IMAGES
+        </div>
+    </div>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
 
 # ============================================================
-# PAGE TITLE
+# SUBTITLE
 # ============================================================
-
-st.markdown(
-    '<div class="main-title">'
-    'Pneumonia Detection System from X-ray Images'
-    '</div>',
-    unsafe_allow_html=True,
-)
 
 st.markdown(
     '<div class="subtitle">'
@@ -120,6 +101,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+# ============================================================
+# CUSTOM CSS
+# ============================================================
+
+st.markdown(
+    """
+    <style>
+    ...
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ============================================================
 # MODEL PATHS
