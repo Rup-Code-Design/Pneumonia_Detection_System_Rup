@@ -504,7 +504,7 @@ Received:
 
 Expected:
 3 classes:
-X-ray / CT / MRI
+X-ray / MRI / CT
 """
     )
 
