@@ -194,8 +194,8 @@ CT / MRI / X-ray
 
 Class mapping:
 0 = CT
-1 = MRI
-2 = X-ray
+1 =  X-ray
+2 = MRI
 """
         )
 
