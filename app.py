@@ -156,9 +156,10 @@ PNEUMONIA_MODEL_PATH = os.path.join(
 # ============================================================
 
 MODALITY_LABELS = [
-    "X-ray",
     "CT",
     "MRI",
+    "X-ray",
+    
 ]
 
 
