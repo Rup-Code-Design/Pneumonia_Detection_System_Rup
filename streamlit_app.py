@@ -83,7 +83,7 @@ with title_col2:
     st.markdown(
         """
         <h1 style="
-            font-size: 38px;
+            font-size: 32px;
             font-weight: 700;
             line-height: 1.15;
             margin: 0;
