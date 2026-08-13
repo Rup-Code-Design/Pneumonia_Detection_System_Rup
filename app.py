@@ -495,9 +495,9 @@ The modality model has only one output.
 
 The application requires a 3-class model:
 
-0 = CT
-1 = MRI
-2 = X-ray
+0 = X-ray
+1 = CT 
+2 = MRI
 
 Your current model appears to be binary.
 """
