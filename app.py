@@ -7,9 +7,9 @@
 #   2. Reject color images
 #   3. Accept grayscale images
 #   4. Identify modality:
-#        - X-ray
 #        - CT
 #        - MRI
+#        - X-ray
 #   5. If X-ray -> proposed pneumonia model
 #   6. Display Normal / Pneumonia
 #   7. Generate downloadable PDF report
@@ -122,17 +122,16 @@ st.markdown(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 # ------------------------------------------------------------
 # REQUIRED MODEL 1:
 # 3-class modality classifier
 #
-# Expected classes:
-#   0 = X-ray
-#   1 = CT
-#   2 = MRI
+# CLASS MAPPING:
+#   0 = CT
+#   1 = MRI
+#   2 = X-ray
 #
-# IMPORTANT:
-# You must train/provide this model.
 # ------------------------------------------------------------
 
 MODALITY_MODEL_PATH = os.path.join(
@@ -159,20 +158,11 @@ MODALITY_LABELS = [
     "CT",
     "MRI",
     "X-ray",
-    
 ]
 
 
 # ============================================================
 # IMAGE SIZE
-# ============================================================
-#
-# The application automatically reads the model input size
-# whenever possible.
-#
-# Fallback:
-#   224 x 224
-#
 # ============================================================
 
 DEFAULT_IMAGE_SIZE = (224, 224)
@@ -185,7 +175,10 @@ DEFAULT_IMAGE_SIZE = (224, 224)
 @st.cache_resource
 def load_modality_model():
 
-    if not os.path.isfile(MODALITY_MODEL_PATH):
+    if not os.path.isfile(
+        MODALITY_MODEL_PATH
+    ):
+
         raise FileNotFoundError(
             f"""
 Modality classifier was not found.
@@ -197,7 +190,12 @@ Required file:
 modality_classifier.keras
 
 This model must classify:
-X-ray / CT / MRI
+CT / MRI / X-ray
+
+Class mapping:
+0 = CT
+1 = MRI
+2 = X-ray
 """
         )
 
@@ -221,7 +219,10 @@ X-ray / CT / MRI
 @st.cache_resource
 def load_pneumonia_model():
 
-    if not os.path.isfile(PNEUMONIA_MODEL_PATH):
+    if not os.path.isfile(
+        PNEUMONIA_MODEL_PATH
+    ):
+
         raise FileNotFoundError(
             f"""
 Pneumonia model was not found.
@@ -235,16 +236,6 @@ GitHub repository as app.py.
         )
 
     try:
-
-        # ----------------------------------------------------
-        # IMPORTANT:
-        # Load the complete .keras model directly.
-        #
-        # We do NOT rebuild the architecture here.
-        #
-        # This avoids the previous problem where the model
-        # architecture and saved weights did not match.
-        # ----------------------------------------------------
 
         model = tf.keras.models.load_model(
             PNEUMONIA_MODEL_PATH,
@@ -272,17 +263,26 @@ def get_model_input_size(model):
 
         shape = model.input_shape
 
-        if isinstance(shape, list):
+        if isinstance(
+            shape,
+            list
+        ):
+
             shape = shape[0]
 
         height = shape[1]
         width = shape[2]
 
-        if height is not None and width is not None:
+        if (
+            height is not None
+            and
+            width is not None
+        ):
 
             return int(height), int(width)
 
     except Exception:
+
         pass
 
     return DEFAULT_IMAGE_SIZE
@@ -292,106 +292,104 @@ def get_model_input_size(model):
 # CHECK WHETHER IMAGE IS GRAYSCALE
 # ============================================================
 
-def is_grayscale_image(image: Image.Image):
+def is_grayscale_image(
+    image: Image.Image
+):
+
     """
     Returns:
         True  -> grayscale
         False -> color
     """
 
-    # --------------------------------------------------------
-    # Explicit grayscale PIL modes
-    # --------------------------------------------------------
+    if image.mode in [
+        "1",
+        "L",
+        "I",
+        "F",
+        "I;16"
+    ]:
 
-    if image.mode in ["1", "L", "I", "F", "I;16"]:
         return True
 
-    # --------------------------------------------------------
-    # Convert palette / transparency images to RGB
-    # --------------------------------------------------------
+    if image.mode in [
+        "P",
+        "RGBA",
+        "LA"
+    ]:
 
-    if image.mode in ["P", "RGBA", "LA"]:
-        rgb = image.convert("RGB")
+        rgb = image.convert(
+            "RGB"
+        )
+
     else:
-        rgb = image.convert("RGB")
 
-    arr = np.asarray(rgb)
+        rgb = image.convert(
+            "RGB"
+        )
 
-    # --------------------------------------------------------
-    # RGB image must have 3 channels
-    # --------------------------------------------------------
+    arr = np.asarray(
+        rgb
+    )
 
-    if arr.ndim != 3 or arr.shape[-1] != 3:
+    if (
+        arr.ndim != 3
+        or
+        arr.shape[-1] != 3
+    ):
+
         return True
-
-    # --------------------------------------------------------
-    # Check whether R == G == B
-    #
-    # For a true grayscale image stored as RGB:
-    #
-    # R = G = B
-    # --------------------------------------------------------
 
     r = arr[:, :, 0]
     g = arr[:, :, 1]
     b = arr[:, :, 2]
 
-    return np.array_equal(r, g) and np.array_equal(g, b)
+    return (
+        np.array_equal(r, g)
+        and
+        np.array_equal(g, b)
+    )
 
 
 # ============================================================
 # PREPROCESS IMAGE
 # ============================================================
 
-def preprocess_image(image, target_size):
+def preprocess_image(
+    image,
+    target_size
+):
 
-    # --------------------------------------------------------
-    # Convert to grayscale
-    # --------------------------------------------------------
-
-    gray = image.convert("L")
-
-    # --------------------------------------------------------
-    # Resize
-    # --------------------------------------------------------
+    gray = image.convert(
+        "L"
+    )
 
     gray = gray.resize(
         target_size,
         Image.Resampling.BILINEAR
     )
 
-    # --------------------------------------------------------
-    # Convert to NumPy
-    # --------------------------------------------------------
-
-    arr = np.asarray(gray).astype(np.float32)
-
-    # --------------------------------------------------------
-    # Normalize
-    #
-    # 0-255 -> 0-1
-    # --------------------------------------------------------
+    arr = np.asarray(
+        gray
+    ).astype(
+        np.float32
+    )
 
     arr = arr / 255.0
 
-    # --------------------------------------------------------
-    # Most CNN models expect 3 channels.
-    #
-    # Therefore grayscale is replicated:
-    #
-    # Gray -> RGB-like 3 channels
-    # --------------------------------------------------------
-
     arr = np.stack(
-        [arr, arr, arr],
+        [
+            arr,
+            arr,
+            arr
+        ],
         axis=-1
     )
 
-    # --------------------------------------------------------
-    # Batch dimension
-    # --------------------------------------------------------
-
-    arr = np.expand_dims(arr, axis=0)
+    arr = np.expand_dims(
+        arr,
+        axis=0
+    )
 
     return arr
 
@@ -400,14 +398,19 @@ def preprocess_image(image, target_size):
 # GENERIC MODEL PREDICTION
 # ============================================================
 
-def get_prediction_array(model, image_array):
+def get_prediction_array(
+    model,
+    image_array
+):
 
     prediction = model.predict(
         image_array,
         verbose=0
     )
 
-    prediction = np.asarray(prediction)
+    prediction = np.asarray(
+        prediction
+    )
 
     return prediction
 
@@ -416,9 +419,14 @@ def get_prediction_array(model, image_array):
 # MODALITY PREDICTION
 # ============================================================
 
-def predict_modality(model, image):
+def predict_modality(
+    model,
+    image
+):
 
-    target_size = get_model_input_size(model)
+    target_size = get_model_input_size(
+        model
+    )
 
     processed = preprocess_image(
         image,
@@ -430,20 +438,21 @@ def predict_modality(model, image):
         processed
     )
 
-    # --------------------------------------------------------
-    # Flatten output
-    # --------------------------------------------------------
-
-    prediction = prediction.reshape(-1)
+    prediction = prediction.reshape(
+        -1
+    )
 
     # --------------------------------------------------------
     # CASE 1:
     # Three-class softmax
+    #
+    # 0 = CT
+    # 1 = MRI
+    # 2 = X-ray
     # --------------------------------------------------------
 
     if len(prediction) == 3:
 
-        # If values are not normalized, apply softmax.
         if not np.isclose(
             np.sum(prediction),
             1.0,
@@ -455,7 +464,9 @@ def predict_modality(model, image):
             ).numpy()
 
         class_index = int(
-            np.argmax(prediction)
+            np.argmax(
+                prediction
+            )
         )
 
         confidence = float(
@@ -472,7 +483,8 @@ def predict_modality(model, image):
     # CASE 2:
     # Binary output
     #
-    # This is NOT enough to identify X-ray/CT/MRI.
+    # This is NOT enough to identify
+    # X-ray / CT / MRI.
     # --------------------------------------------------------
 
     if len(prediction) == 1:
@@ -483,9 +495,9 @@ The modality model has only one output.
 
 The application requires a 3-class model:
 
-0 = X-ray
-1 = CT
-2 = MRI
+0 = CT
+1 = MRI
+2 = X-ray
 
 Your current model appears to be binary.
 """
@@ -504,7 +516,7 @@ Received:
 
 Expected:
 3 classes:
-X-ray / CT / MRI
+CT / MRI / X-ray
 """
     )
 
@@ -513,9 +525,14 @@ X-ray / CT / MRI
 # PNEUMONIA PREDICTION
 # ============================================================
 
-def predict_pneumonia(model, image):
+def predict_pneumonia(
+    model,
+    image
+):
 
-    target_size = get_model_input_size(model)
+    target_size = get_model_input_size(
+        model
+    )
 
     processed = preprocess_image(
         image,
@@ -527,7 +544,9 @@ def predict_pneumonia(model, image):
         processed
     )
 
-    prediction = prediction.reshape(-1)
+    prediction = prediction.reshape(
+        -1
+    )
 
     # --------------------------------------------------------
     # CASE 1:
@@ -544,8 +563,11 @@ def predict_pneumonia(model, image):
             prediction[0]
         )
 
-        # If output isn't in [0,1], use sigmoid.
-        if probability < 0.0 or probability > 1.0:
+        if (
+            probability < 0.0
+            or
+            probability > 1.0
+        ):
 
             probability = float(
                 tf.sigmoid(
@@ -563,7 +585,9 @@ def predict_pneumonia(model, image):
 
             label = "Normal"
 
-            confidence = 1.0 - probability
+            confidence = (
+                1.0 - probability
+            )
 
         return (
             label,
@@ -578,21 +602,18 @@ def predict_pneumonia(model, image):
     # Assumption:
     #   index 0 = Normal
     #   index 1 = Pneumonia
-    #
-    # If your training labels use the opposite order,
-    # change this mapping.
     # --------------------------------------------------------
 
     if len(prediction) == 2:
 
         probabilities = prediction
 
-        # Apply softmax if necessary.
-
         if (
             np.any(probabilities < 0)
-            or np.any(probabilities > 1)
-            or not np.isclose(
+            or
+            np.any(probabilities > 1)
+            or
+            not np.isclose(
                 np.sum(probabilities),
                 1.0,
                 atol=1e-3
@@ -604,7 +625,9 @@ def predict_pneumonia(model, image):
             ).numpy()
 
         class_index = int(
-            np.argmax(probabilities)
+            np.argmax(
+                probabilities
+            )
         )
 
         if class_index == 0:
@@ -695,10 +718,6 @@ def create_pdf_report(
 
     story = []
 
-    # --------------------------------------------------------
-    # TITLE
-    # --------------------------------------------------------
-
     story.append(
         Paragraph(
             "Pneumonia Detection System from X-ray Images",
@@ -719,17 +738,9 @@ def create_pdf_report(
         )
     )
 
-    # --------------------------------------------------------
-    # DATE/TIME
-    # --------------------------------------------------------
-
     report_time = datetime.now().strftime(
         "%d %B %Y, %I:%M:%S %p"
     )
-
-    # --------------------------------------------------------
-    # BASIC INFORMATION
-    # --------------------------------------------------------
 
     story.append(
         Paragraph(
@@ -739,9 +750,18 @@ def create_pdf_report(
     )
 
     information_data = [
-        ["Report Date", report_time],
-        ["Image Mode", "Grayscale"],
-        ["Detected Modality", modality],
+        [
+            "Report Date",
+            report_time
+        ],
+        [
+            "Image Mode",
+            "Grayscale"
+        ],
+        [
+            "Detected Modality",
+            modality
+        ],
         [
             "Modality Confidence",
             f"{modality_confidence * 100:.2f}%"
@@ -751,7 +771,10 @@ def create_pdf_report(
     if diagnosis is not None:
 
         information_data.append(
-            ["Pneumonia Result", diagnosis]
+            [
+                "Pneumonia Result",
+                diagnosis
+            ]
         )
 
         information_data.append(
@@ -831,13 +854,16 @@ def create_pdf_report(
         )
     )
 
-    story.append(table)
+    story.append(
+        table
+    )
 
-    story.append(Spacer(1, 12))
-
-    # --------------------------------------------------------
-    # UPLOADED IMAGE
-    # --------------------------------------------------------
+    story.append(
+        Spacer(
+            1,
+            12
+        )
+    )
 
     story.append(
         Paragraph(
@@ -848,12 +874,16 @@ def create_pdf_report(
 
     image_buffer = io.BytesIO()
 
-    image.convert("RGB").save(
+    image.convert(
+        "RGB"
+    ).save(
         image_buffer,
         format="JPEG"
     )
 
-    image_buffer.seek(0)
+    image_buffer.seek(
+        0
+    )
 
     report_image = RLImage(
         image_buffer,
@@ -861,13 +891,16 @@ def create_pdf_report(
         height=100 * mm,
     )
 
-    story.append(report_image)
+    story.append(
+        report_image
+    )
 
-    story.append(Spacer(1, 12))
-
-    # --------------------------------------------------------
-    # RESULT
-    # --------------------------------------------------------
+    story.append(
+        Spacer(
+            1,
+            12
+        )
+    )
 
     if diagnosis is not None:
 
@@ -896,12 +929,11 @@ def create_pdf_report(
             )
         )
 
-        # ----------------------------------------------------
-        # DISCLAIMER
-        # ----------------------------------------------------
-
         story.append(
-            Spacer(1, 10)
+            Spacer(
+                1,
+                10
+            )
         )
 
         story.append(
@@ -923,13 +955,13 @@ def create_pdf_report(
             )
         )
 
-    # --------------------------------------------------------
-    # BUILD PDF
-    # --------------------------------------------------------
+    document.build(
+        story
+    )
 
-    document.build(story)
-
-    buffer.seek(0)
+    buffer.seek(
+        0
+    )
 
     return buffer.getvalue()
 
@@ -940,7 +972,9 @@ def create_pdf_report(
 
 with st.sidebar:
 
-    st.header("System Workflow")
+    st.header(
+        "System Workflow"
+    )
 
     st.markdown(
         """
@@ -1022,7 +1056,9 @@ if uploaded_file is not None:
     # Display uploaded image
     # --------------------------------------------------------
 
-    st.subheader("Uploaded Image")
+    st.subheader(
+        "Uploaded Image"
+    )
 
     st.image(
         image,
@@ -1058,7 +1094,9 @@ if uploaded_file is not None:
         # STEP 1 — COLOR IMAGE CHECK
         # ====================================================
 
-        if not is_grayscale_image(image):
+        if not is_grayscale_image(
+            image
+        ):
 
             st.error(
                 "Rejected: The uploaded image is a color image."
@@ -1088,7 +1126,9 @@ if uploaded_file is not None:
 
             try:
 
-                modality_model = load_modality_model()
+                modality_model = (
+                    load_modality_model()
+                )
 
             except Exception as e:
 
@@ -1242,7 +1282,9 @@ if uploaded_file is not None:
 
                 try:
 
-                    pneumonia_model = load_pneumonia_model()
+                    pneumonia_model = (
+                        load_pneumonia_model()
+                    )
 
                 except Exception as e:
 
