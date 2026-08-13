@@ -65,7 +65,7 @@ st.markdown(
 
     .main-title {
         text-align: center;
-        font-size: 34px;
+        font-size: 30px;
         font-weight: 700;
         margin-bottom: 5px;
     }
@@ -136,8 +136,8 @@ if os.path.exists(ICON_PATH):
             <img
                 src="data:image/png;base64,{icon_base64}"
                 style="
-                    width: 70px;
-                    height: 70px;
+                    width: 10px;
+                    height: 10px;
                     object-fit: contain;
                     border-radius: 8px;
                 "
