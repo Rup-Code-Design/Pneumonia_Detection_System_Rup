@@ -103,15 +103,139 @@ st.markdown(
 
 
 # ============================================================
-# PAGE TITLE
+# PAGE TITLE WITH LUNG X-RAY ICON
 # ============================================================
 
-st.markdown(
-    '<div class="main-title">'
-    'Pneumonia Detection System from X-ray Images'
-    '</div>',
-    unsafe_allow_html=True,
+ICON_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "lung_xray_icon.png"
 )
+
+if os.path.exists(ICON_PATH):
+
+    with open(ICON_PATH, "rb") as f:
+        icon_bytes = f.read()
+
+    import base64
+
+    icon_base64 = base64.b64encode(
+        icon_bytes
+    ).decode()
+
+    st.markdown(
+        f"""
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 5px;
+            margin-bottom: 8px;
+        ">
+
+            <img
+                src="data:image/png;base64,{icon_base64}"
+                style="
+                    width: 70px;
+                    height: 70px;
+                    object-fit: contain;
+                    border-radius: 8px;
+                "
+            >
+
+            <div style="
+                font-size: 34px;
+                font-weight: 700;
+                text-align: left;
+                line-height: 1.15;
+            ">
+                PNEUMONIA DETECTION SYSTEM<br>
+                FROM X-RAY IMAGES
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+else:
+
+    st.markdown(
+        '<div class="main-title">'
+        'PNEUMONIA DETECTION SYSTEM FROM X-RAY IMAGES'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+# ============================================================
+# PAGE TITLE WITH LUNG X-RAY ICON
+# ============================================================
+
+ICON_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "lung_xray_icon.png"
+)
+
+if os.path.exists(ICON_PATH):
+
+    with open(ICON_PATH, "rb") as f:
+        icon_bytes = f.read()
+
+    import base64
+
+    icon_base64 = base64.b64encode(
+        icon_bytes
+    ).decode()
+
+    st.markdown(
+        f"""
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 5px;
+            margin-bottom: 8px;
+        ">
+
+            <img
+                src="data:image/png;base64,{icon_base64}"
+                style="
+                    width: 70px;
+                    height: 70px;
+                    object-fit: contain;
+                    border-radius: 8px;
+                "
+            >
+
+            <div style="
+                font-size: 34px;
+                font-weight: 700;
+                text-align: left;
+                line-height: 1.15;
+            ">
+                PNEUMONIA DETECTION SYSTEM<br>
+                FROM X-RAY IMAGES
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+else:
+
+    st.markdown(
+        '<div class="main-title">'
+        'PNEUMONIA DETECTION SYSTEM FROM X-RAY IMAGES'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+# ============================================================
+# SUBTITLE
+# ============================================================
 
 st.markdown(
     '<div class="subtitle">'
