@@ -976,8 +976,8 @@ def create_pdf_report(
 
     report_image = RLImage(
         image_buffer,
-        width=100 * mm,
-        height=100 * mm,
+        width=60 * mm,
+        height=60 * mm,
     )
 
     story.append(
